@@ -1,0 +1,29 @@
+/*
+    作业1:偏好的播放场景，sql参考
+*/
+select 
+	from_unixtime(log_time,'%y-%m-%d') as dt,
+	from_unixtime(log_time,'%H') log_hour,
+	refer,
+    count(distinct device_id) uv,
+    sum(1),
+    sum(duration)/count(distinct device_id)  as duration_per_uv
+from user_play_detail
+group by 1,2,3
+
+/*
+    作业2:心动模式效果——局部视角指标，以有效播放率为例的sql参考
+*/
+select
+    source,
+    case
+        when rec_type = "hearbeat" then rec_type
+        else "other"
+    end as rec_type,
+    sum(effective_play_cnt_1d)/sum(play_cnt_1d) as efc_play_pvratio,
+    count(distinct if (effective_play_cnt_1d>0,device_id,null))/count(distinct device_id) as efc_play_uvratio
+
+from user_play_fact_conalg
+where source='UserLikeList'
+group by 1,2
+
